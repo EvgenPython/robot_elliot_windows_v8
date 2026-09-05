@@ -37,9 +37,9 @@ ALLOWED_EXECUTION_MODES = {
 #
 # Одного изменения EXECUTION_MODE недостаточно.
 #
-EXECUTION_MODE = EXECUTION_MODE_DEMO_LIVE
+EXECUTION_MODE = EXECUTION_MODE_DRY_RUN
 
-DEMO_LIVE_ARMED = True
+DEMO_LIVE_ARMED = False
 
 
 # ============================================================
