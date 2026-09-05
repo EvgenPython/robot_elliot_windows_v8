@@ -33,6 +33,7 @@ from trade_state import (
 from web_runtime_state import write_runner_status
 from entry_watch import inspect_entry_trigger
 from entry_check_cycle import run_entry_check
+from console_log import install_console_log
 
 
 # ============================================================
@@ -764,6 +765,9 @@ def run_forever():
 # ============================================================
 
 def main():
+    log_path = install_console_log()
+    if log_path is not None:
+        print(f"[LOG] UTF-8 журнал: {log_path}")
     try:
         with SingleInstanceLock(
             LOCK_PATH
