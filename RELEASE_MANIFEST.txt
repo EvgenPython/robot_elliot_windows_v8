@@ -1,0 +1,117 @@
+ROBOT ELLIOT — STRICT QUALITY RECOVERY 2026-08-25
+==================================================
+
+Changed in this update:
+- analysis_schedule.py
+- claude_reference_state.py
+- main.py
+- analysis_archive.py
+- claude_client.py
+- claude_request_guard.py
+- claude_staged_client.py
+- run_web_full_test.py
+- recover_paid_web_test.py
+- PAID_MAP_RECOVERY_README.txt
+- scout_client.py
+- web_publisher.py
+- test_claude_retry_policy.py
+- test_daily_analysis_policy.py
+- test_staged_analysis.py
+- test_web_export.py
+- test_recover_paid_web_test.py
+- CLAUDE_RELIABILITY_README.txt
+- DAILY_FULL_POLICY_README.txt
+- RELEASE_MANIFEST.txt
+- STEP10_README.txt
+- WINDOWS_TO_LINUX_README.txt
+
+Added in this update:
+- claude_stream_recovery.py
+- test_claude_stream_recovery.py
+- web_market_snapshot.py
+- config/web_export.example.json
+- config/anthropic.example.json
+
+Retained from the previous reliability/web update:
+- analysis_state.py
+- chart_contract.py
+- recover_web_payload.py
+- test_staged_analysis.py
+- Linux read-only export contract
+
+Verification:
+- all Windows project Python source files compile;
+- 59 Windows unit/integration tests pass;
+- legacy multi-issue data_quality rows from an already paid response are
+  normalized losslessly and still pass the complete semantic validation;
+- the strict wire schema now requires a closed data_quality object, preventing
+  the same variable-row-length failure in future MAP and DECISION responses;
+- a saved end_turn FULL_MAP/FULL_MAP_REPAIR can be recovered locally; only the
+  still-missing FULL_DECISION may be called and only with an explicit flag;
+- a failed REPAIR is terminal for that stage and cannot recursively request a
+  second repair or repeat the expensive source stage;
+- all standalone paid diagnostics require an explicit confirmation flag;
+- Scout keeps the complete post-baseline H1 working-day tape while M15/M5
+  remain bounded recent windows;
+- exactly one mandatory daily FULL exists at H1 close 08:00 FP;
+- H1 closes at 09:00-22:00 FP are Scout cycles unless escalated;
+- Scout defaults to the separate claude-haiku-4-5-20251001 model while FULL
+  remains on the configured claude-sonnet-5 model;
+- Scout escalates only a new semantic event (pullback/retest/base/reversal/
+  character or scenario change/reference conflict/new setup); same-direction
+  continuation, a new extreme, expected level break, level approach, or
+  low/medium confidence alone are code-normalized to NO FULL;
+- no cooldown and no time/count cap on genuine event-driven FULL analyses;
+- the successful FULL reference remains valid through the same FP working day
+  and is rejected on the next FP date;
+- main's position gate returns before Market Snapshot and every Claude stage;
+- runner's managed-position branch skips the flat/new-H1 analysis branch;
+- the FULL_MAP API schema is reduced from 5,034 to 1,686 JSON bytes;
+- the FULL_DECISION API schema is reduced from 3,492 to 1,057 JSON bytes;
+- compact wire rows round-trip into the unchanged canonical map, decision and
+  visualization contracts with strict integer/float/bool/null conversion;
+- two paid FULL_MAP runs proved that effort=max can consume all 48k and then
+  all 128k tokens as thinking without producing the final JSON;
+- FULL_MAP now uses effort=medium with a 64k ceiling;
+- FULL_DECISION uses effort=medium with a 48k ceiling;
+- REPAIR stages use effort=medium with 32k/24k ceilings;
+- the model, complete raw data, prompts, strict schemas, semantic validators
+  and trading contracts remain unchanged;
+- the paid web test uses new V4 journal stages, so the previous grammar and
+  max_tokens failures cannot block the corrected test cycle;
+- an interrupted SSE stream is journaled incrementally;
+- a complete schema-valid JSON object survives a lost message_stop without a
+  second paid request;
+- incomplete or schema-invalid partial output is never promoted;
+- outcome-unknown has a hard ceiling of two attempts per stage, even if an old
+  local config asks for more;
+- a known invalid FULL response triggers one separately journaled REPAIR
+  request instead of another complete FULL stage;
+- 429 Retry-After is retained by the business retry policy;
+- a fresh raw MT5 market snapshot is stored before Claude analysis and is
+  published through its own endpoint;
+- the market export reuses the already collected snapshot, calls neither MT5
+  nor Claude and contains every export failure outside the trading pipeline;
+- FULL_MAP survives a FULL_DECISION retry without another map API call;
+- restart recovery reads validated stage output from analysis_archive;
+- all D1/H4/H1/M15/M5 raw timeframes remain covered;
+- FULL_MAP gets complete D1/H4/H1 history;
+- FULL_DECISION gets the validated map, latest 120 closed H1 bars and the
+  complete existing M15/M5 windows;
+- confirmed wave anchors are preserved by stable ID or explicitly invalidated;
+- assembled result has exactly the original FULL top-level contract;
+- effective stage instructions, including wire columns and completion reserve,
+  remain 48.1% shorter;
+- actual per-stage and total usage are stored for cost/quality comparison.
+- billing-unknown and delivery-recovered states are exported to Linux web.
+
+Trading strategy files verified byte-for-byte unchanged:
+- risk_manager.py
+- trade_executor.py
+- trade_state.py
+- live_executor.py
+- pending_executor.py
+- execution_control.py
+- runtime_policy.py
+
+Runtime state, archives, local configs and secrets are excluded from the ZIP.
