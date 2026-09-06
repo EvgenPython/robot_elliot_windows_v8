@@ -36,6 +36,23 @@ class MarketFactsTests(unittest.TestCase):
         self.assertEqual(item["direction"], "bullish")
         self.assertEqual(item["price_low"], 100.0)
         self.assertEqual(item["price_high"], 104.0)
+        self.assertEqual(item["status"], "open")
+        self.assertEqual(item["current_relation"], "above")
+        self.assertTrue(
+            facts["contract"]["imbalances_must_be_assessed_in_trade_decision"]
+        )
+
+    def test_fvg_tracks_partial_fill_without_marking_it_filled(self):
+        bars = [
+            _bar(1, 99, 100, 98, 99),
+            _bar(2, 103, 105, 103, 104),
+            _bar(3, 105, 107, 104, 106),
+            _bar(4, 105, 106, 102, 103),
+        ]
+        snapshot = {"timeframes": {name: {"closed_bars": pd.DataFrame(bars)} for name in ("D1", "H4", "H1", "M15", "M5")}}
+        item = build_deterministic_market_facts(snapshot)["imbalances"]["H1"][0]
+        self.assertEqual(item["status"], "partially_filled")
+        self.assertEqual(item["fill_fraction"], 0.5)
 
     def test_volume_is_normalized(self):
         facts = build_deterministic_market_facts(self._snapshot())

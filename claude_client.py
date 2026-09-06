@@ -1493,6 +1493,9 @@ CLAUDE_RESPONSE_SCHEMA = {
                 "target_basis": {"type": "string"},
                 "reasoning": {"type": "string"},
                 "invalidation_reason": {"type": "string"},
+                "fvg_role": {"type": "string"},
+                "fvg_ids": {"type": "string"},
+                "fvg_basis": {"type": "string"},
             },
             "required": [
                 "action",
@@ -1511,6 +1514,9 @@ CLAUDE_RESPONSE_SCHEMA = {
                 "target_basis",
                 "reasoning",
                 "invalidation_reason",
+                "fvg_role",
+                "fvg_ids",
+                "fvg_basis",
             ],
             "additionalProperties": False,
         },
@@ -2554,6 +2560,16 @@ def validate_analysis_contract(
         "medium",
         "high",
     }
+    allowed_fvg_roles = {
+        "confirmation",
+        "entry_zone",
+        "target",
+        "invalidation",
+        "conflict",
+        "neutral",
+        "no_relevant_fvg",
+        "not_assessed_legacy",
+    }
 
     if analysis.get("instrument") != "XAUUSD":
         raise ValueError(
@@ -2611,6 +2627,15 @@ def validate_analysis_contract(
             "Claude вернул неизвестный confidence: "
             f"{recommendation.get('confidence')}."
         )
+
+    fvg_role = recommendation.get("fvg_role") or "not_assessed_legacy"
+    recommendation["fvg_role"] = fvg_role
+    recommendation.setdefault("fvg_ids", "")
+    recommendation.setdefault("fvg_basis", "")
+    if fvg_role not in allowed_fvg_roles:
+        raise ValueError(f"Claude вернул неизвестную роль FVG: {fvg_role}.")
+    if action in {"enter_long", "enter_short"} and fvg_role == "conflict":
+        raise ValueError("Claude рекомендовал вход при явно конфликтующем FVG-контексте.")
 
     if action == "stay_out":
         if setup_type != "no_trade":

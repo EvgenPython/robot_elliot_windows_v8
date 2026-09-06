@@ -270,6 +270,9 @@ RECOMMENDATION_COLUMNS = (
     "target_basis",
     "reasoning",
     "invalidation_reason",
+    "fvg_role",
+    "fvg_ids",
+    "fvg_basis",
 )
 WAVE_POINT_COLUMNS = (
     "scenario",
@@ -614,8 +617,10 @@ D1/H4/H1 raw данным того же frozen snapshot, и (2) raw H1/M15/M5 д
 тот же строгий торговый контракт, который использует действующая стратегия.
 
 deterministic_market_facts имеют приоритет для статусов уровней, относительного
-тикового объёма и FVG. На M15/M5 проверь реакцию на открытые имбалансы, но не
-создавай сделку только из-за наличия FVG. Каждый confirmation/invalidation
+тикового объёма и FVG. На H1/M15/M5 обязательно оцени реакцию на открытые и
+частично заполненные имбалансы. FVG участвует в решении как confluence,
+entry zone, target, invalidation или conflict, но не создаёт сделку в одиночку.
+Каждый confirmation/invalidation
 уровень описывай отдельно: касание, закрытие, закрепление и ретест — разные
 события.
 
@@ -658,6 +663,11 @@ deterministic_market_facts имеют приоритет для статусов
 - setup_quality оценивает весь edge: режим/фазу, maturity, structure/pattern,
   TF alignment, location, stop geometry, достижимый target, фактический
   reward/risk, volatility/spread, alternate scenario и data quality.
+- recommendation.fvg_role обязателен: confirmation, entry_zone, target,
+  invalidation, conflict, neutral или no_relevant_fvg. В fvg_ids перечисли
+  точные deterministic IDs через запятую, а в bilingual fvg_basis объясни,
+  как FVG повлиял на вход/отказ. Если FVG конфликтует с направлением или делает
+  вход поздним, action должен быть stay_out. Не выдумывай FVG сверх Python facts.
 
 ACTION И УРОВНИ
 - action только enter_long, enter_short или stay_out.
@@ -1578,7 +1588,7 @@ def _expand_wire_visualization(value) -> dict:
             "lower_start_price", "lower_end_price",
         ),
         ("breakout_price", "reentry_price"),
-        optional_trailing=1,
+        optional_trailing=4,
     )
     pattern_shapes = safe_rows(
         "pattern_shapes",
@@ -1769,6 +1779,9 @@ def validate_market_map_result(
         "target_basis": "Not applicable.",
         "reasoning": "Map validation only.",
         "invalidation_reason": "No trade decision at FULL_MAP.",
+        "fvg_role": "no_relevant_fvg",
+        "fvg_ids": "",
+        "fvg_basis": "EN: No trade decision is made at the market-map stage.\nRU: На этапе карты рынка торговое решение не принимается.",
     }
     validate_trade_levels(semantic_probe)
     validate_analysis_contract(semantic_probe)

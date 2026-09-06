@@ -231,6 +231,9 @@ def _decision(payload: dict, wave_points=None) -> dict:
             "target_basis": "Not applicable.",
             "reasoning": "Wait for a valid trigger without forcing a trade.",
             "invalidation_reason": "No active trade idea.",
+            "fvg_role": "no_relevant_fvg",
+            "fvg_ids": "",
+            "fvg_basis": "No relevant FVG affects this decision.",
         },
         "data_quality": {"sufficient": True, "issues": "none"},
     }
@@ -684,9 +687,10 @@ class StagedPayloadTests(unittest.TestCase):
         # Bilingual narratives plus compact Elliott/Fibonacci display rules are
         # part of the paid-stage contract; prompts must still remain far below
         # the legacy monolithic prompt.
-        self.assertLess(staged_prompts, len(claude_client.SYSTEM_PROMPT) * 0.8)
+        self.assertLess(staged_prompts, len(claude_client.SYSTEM_PROMPT) * 0.83)
         self.assertIn("fib_retracement", staged.MARKET_MAP_SYSTEM_PROMPT)
         self.assertIn("(I)..(V)", staged.MARKET_MAP_SYSTEM_PROMPT)
+        self.assertIn("recommendation.fvg_role", staged.TRADE_DECISION_SYSTEM_PROMPT)
         self.assertEqual(
             staged.MAP_MAX_TOKENS + staged.DECISION_MAX_TOKENS,
             112_000,

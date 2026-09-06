@@ -63,6 +63,11 @@ def refresh_entry_watch(analysis: dict, source_h1: str | None = None) -> dict:
         "source_analysis_timestamp": analysis.get("timestamp"),
         "source_h1_closed_bar_time": source_h1,
         "projection": selected,
+        "fvg_context": {
+            "role": (analysis.get("recommendation") or {}).get("fvg_role"),
+            "ids": (analysis.get("recommendation") or {}).get("fvg_ids", ""),
+            "basis": (analysis.get("recommendation") or {}).get("fvg_basis", ""),
+        },
         "last_checked_closed_bar_time": None,
         "triggered_closed_bar_time": None,
         "last_checked_bar": None,

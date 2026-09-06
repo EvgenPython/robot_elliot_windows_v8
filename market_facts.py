@@ -1,8 +1,9 @@
 """Deterministic market facts shared by Scout and FULL.
 
 This module never labels Elliott waves and never makes a trading decision.
-It only calculates facts that should not be delegated to an LLM: closed-bar
-level relations, broker tick-volume statistics and three-candle imbalances.
+It calculates facts that should not be delegated to an LLM: closed-bar level
+relations, broker tick-volume statistics and three-candle imbalances. Claude
+must evaluate these FVG facts as one confluence/conflict input to its decision.
 """
 
 from __future__ import annotations
@@ -163,6 +164,7 @@ def _volume_facts(snapshot: dict) -> dict:
 
 def _imbalance_facts(snapshot: dict, timeframe: str) -> list[dict]:
     bars = _bars_from_snapshot(snapshot, timeframe)
+    latest_close = _number(bars[-1].get("close")) if bars else None
     found = []
     for index in range(2, len(bars)):
         first, middle, third = bars[index - 2], bars[index - 1], bars[index]
@@ -180,13 +182,40 @@ def _imbalance_facts(snapshot: dict, timeframe: str) -> list[dict]:
             continue
         later = bars[index + 1:]
         filled_at = None
+        first_mitigated_at = None
+        deepest_fill_fraction = 0.0
         for bar in later:
             bar_low, bar_high = _number(bar.get("low")), _number(bar.get("high"))
             if bar_low is None or bar_high is None:
                 continue
-            if bar_low <= low and bar_high >= high:
+            if direction == "bullish":
+                if bar_low < high and first_mitigated_at is None:
+                    first_mitigated_at = bar.get("time")
+                fill_fraction = (high - min(high, max(low, bar_low))) / (high - low)
+                deepest_fill_fraction = max(deepest_fill_fraction, fill_fraction)
+                fully_filled = bar_low <= low
+            else:
+                if bar_high > low and first_mitigated_at is None:
+                    first_mitigated_at = bar.get("time")
+                fill_fraction = (min(high, max(low, bar_high)) - low) / (high - low)
+                deepest_fill_fraction = max(deepest_fill_fraction, fill_fraction)
+                fully_filled = bar_high >= high
+            if fully_filled:
                 filled_at = bar.get("time")
                 break
+        status = "filled" if filled_at else "partially_filled" if first_mitigated_at else "open"
+        if latest_close is None:
+            current_relation = "unknown"
+            distance_to_zone = None
+        elif latest_close < low:
+            current_relation = "below"
+            distance_to_zone = low - latest_close
+        elif latest_close > high:
+            current_relation = "above"
+            distance_to_zone = latest_close - high
+        else:
+            current_relation = "inside"
+            distance_to_zone = 0.0
         found.append({
             "id": f"fvg_{timeframe}_{third.get('time')}_{direction}",
             "timeframe": timeframe,
@@ -196,11 +225,15 @@ def _imbalance_facts(snapshot: dict, timeframe: str) -> list[dict]:
             "price_low": low,
             "price_high": high,
             "size_price": round(high - low, 8),
-            "status": "filled" if filled_at else "open",
+            "status": status,
+            "first_mitigated_at": first_mitigated_at,
             "filled_at": filled_at,
+            "fill_fraction": round(min(1.0, deepest_fill_fraction), 4),
+            "current_relation": current_relation,
+            "distance_to_zone": round(distance_to_zone, 8) if distance_to_zone is not None else None,
             "definition": "three_closed_candle_fair_value_gap",
         })
-    open_items = [item for item in found if item["status"] == "open"]
+    open_items = [item for item in found if item["status"] in {"open", "partially_filled"}]
     recent_filled = [item for item in found if item["status"] == "filled"][-2:]
     return (open_items[-MAX_IMBALANCES_PER_TIMEFRAME:] + recent_filled)[-MAX_IMBALANCES_PER_TIMEFRAME:]
 
@@ -215,7 +248,9 @@ def build_deterministic_market_facts(
             "facts_owner": "Python",
             "level_relations_are_authoritative": True,
             "volume_statistics_are_authoritative_for_broker_tick_volume_only": True,
-            "imbalances_are_geometry_only_not_trade_signals": True,
+            "imbalances_are_authoritative_geometry": True,
+            "imbalances_must_be_assessed_in_trade_decision": True,
+            "imbalances_are_not_standalone_entry_signals": True,
         },
         "reference_level_statuses": _level_facts(snapshot, previous_reference),
         "h1_tick_volume": _volume_facts(snapshot),
