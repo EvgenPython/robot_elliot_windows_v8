@@ -17,10 +17,11 @@ import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from instruments import symbol_state_path
 
 
 BASE_DIR = Path(__file__).resolve().parent
-STATE_PATH = BASE_DIR / "state" / "claude_request_guard.json"
+STATE_PATH = symbol_state_path("claude_request_guard.json")
 STATE_VERSION = 3
 MAX_CYCLES = 200
 FILE_IO_RETRY_DELAYS_SECONDS = (0.05, 0.15, 0.35, 0.75)

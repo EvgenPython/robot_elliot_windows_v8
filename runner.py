@@ -40,7 +40,9 @@ from console_log import install_console_log
 # RUNNER SETTINGS
 # ============================================================
 
-SYMBOL = "XAUUSD"
+from instruments import active_instrument
+
+SYMBOL = active_instrument()
 
 BASE_DIR = Path(__file__).resolve().parent
 LOCK_PATH = BASE_DIR / "state" / "runner.lock"

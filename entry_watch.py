@@ -8,11 +8,12 @@ import MetaTrader5 as mt5
 
 from market_data import TIMEFRAMES, mt5_timestamp_to_fp
 from prop_time import now_fp
+from instruments import symbol_state_path
 
 
 BASE_DIR = Path(__file__).resolve().parent
 STATE_DIR = BASE_DIR / "state"
-ENTRY_WATCH_PATH = STATE_DIR / "entry_watch.json"
+ENTRY_WATCH_PATH = symbol_state_path("entry_watch.json")
 
 
 def _atomic_write(value: dict) -> None:

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from prop_time import FUNDINGPIPS_TZ, now_fp
+from instruments import symbol_state_path
 
 
 # ============================================================
@@ -11,7 +12,7 @@ from prop_time import FUNDINGPIPS_TZ, now_fp
 
 BASE_DIR = Path(__file__).resolve().parent
 STATE_DIR = BASE_DIR / "state"
-REFERENCE_STATE_PATH = STATE_DIR / "claude_reference_state.json"
+REFERENCE_STATE_PATH = symbol_state_path("claude_reference_state.json")
 
 
 # ============================================================

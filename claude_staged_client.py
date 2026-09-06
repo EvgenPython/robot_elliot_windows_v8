@@ -21,6 +21,9 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from instruments import active_instrument
+
+SYMBOL = active_instrument()
 
 import anthropic
 
@@ -607,6 +610,7 @@ relationship, raw tape, swing high/low и буквальные машинные 
 Ответ — только Structured JSON по заданной schema. Поля должны быть содержательны,
 но без повторения одного и того же объяснения в нескольких разделах.
 """.strip()
+MARKET_MAP_SYSTEM_PROMPT = MARKET_MAP_SYSTEM_PROMPT.replace("XAUUSD", SYMBOL)
 
 
 TRADE_DECISION_SYSTEM_PROMPT = """
@@ -711,6 +715,7 @@ EN: <English>\nRU: <Русский>. Числа, enum, time, IDs и wave labels 
 Ответ — только Structured JSON по schema. reasoning должен быть глубоким и
 связным, но без дублирования уже принятой validated_market_map.
 """.strip()
+TRADE_DECISION_SYSTEM_PROMPT = TRADE_DECISION_SYSTEM_PROMPT.replace("XAUUSD", SYMBOL)
 
 
 MARKET_MAP_REPAIR_SYSTEM_PROMPT = """
@@ -1711,7 +1716,7 @@ def validate_market_map_result(
     payload: dict,
     previous_anchor_reference: dict,
 ) -> None:
-    if result.get("instrument") != "XAUUSD":
+    if result.get("instrument") != SYMBOL:
         raise ValueError("FULL_MAP вернул неожиданный instrument.")
     if set(result) != set(MARKET_MAP_SCHEMA["required"]):
         raise ValueError("FULL_MAP top-level contract не совпадает со schema.")
@@ -1862,7 +1867,7 @@ def analyze_trade_decision(
             invalid_result=wire_result,
             validation_error=f"{type(error).__name__}: {error}",
         ) from error
-    if result.get("instrument") != "XAUUSD":
+    if result.get("instrument") != SYMBOL:
         raise ClaudeInvalidResponseError(
             "FULL_DECISION вернул неожиданный instrument.",
             invalid_result=result,
@@ -1910,7 +1915,7 @@ def analyze_entry_check(
             invalid_result=wire_result,
             validation_error=f"{type(error).__name__}: {error}",
         ) from error
-    if result.get("instrument") != "XAUUSD" or set(result) != set(
+    if result.get("instrument") != SYMBOL or set(result) != set(
         TRADE_DECISION_SCHEMA["required"]
     ):
         raise ClaudeInvalidResponseError(
@@ -1938,7 +1943,7 @@ def repair_market_map(
         "repair_scope": "contract_and_reported_validation_error_only",
         "validation_error": str(validation_error),
         "immutable_facts": {
-            "instrument": "XAUUSD",
+            "instrument": SYMBOL,
             "timestamp": str(payload.get("timestamp")),
             "timezone": payload.get("timezone"),
             "symbol_specification": (
@@ -2039,7 +2044,7 @@ def repair_trade_decision(
             invalid_result=wire_result,
             validation_error=f"{type(error).__name__}: {error}",
         ) from error
-    if result.get("instrument") != "XAUUSD":
+    if result.get("instrument") != SYMBOL:
         raise ClaudeInvalidResponseError(
             "FULL_DECISION_REPAIR вернул неожиданный instrument.",
             invalid_result=result,
@@ -2228,7 +2233,7 @@ def assemble_staged_analysis(
 
     analysis = {
         "timestamp": str(payload.get("timestamp") or trade_decision["timestamp"]),
-        "instrument": "XAUUSD",
+        "instrument": SYMBOL,
         "market_regime": copy.deepcopy(market_map["market_regime"]),
         "timeframe_analysis": map_tf,
         "price_structure": copy.deepcopy(market_map["price_structure"]),

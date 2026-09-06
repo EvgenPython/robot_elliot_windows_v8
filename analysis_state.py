@@ -14,7 +14,9 @@ from trade_state import (
 # ОСНОВНЫЕ НАСТРОЙКИ
 # ============================================================
 
-SYMBOL = "XAUUSD"
+from instruments import active_instrument, symbol_state_path
+
+SYMBOL = active_instrument()
 
 STATE_VERSION = 1
 
@@ -32,10 +34,7 @@ STATE_DIR = (
     / "state"
 )
 
-ANALYSIS_STATE_PATH = (
-    STATE_DIR
-    / "analysis_state.json"
-)
+ANALYSIS_STATE_PATH = symbol_state_path("analysis_state.json")
 
 
 # ============================================================

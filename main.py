@@ -161,7 +161,9 @@ from entry_watch import refresh_entry_watch
 # ОСНОВНЫЕ НАСТРОЙКИ
 # ============================================================
 
-SYMBOL = "XAUUSD"
+from instruments import active_instrument
+
+SYMBOL = active_instrument()
 
 PROJECT_MODE = (
     "FUNDINGPIPS_2_STEP_STANDARD_EVALUATION_ONLY"

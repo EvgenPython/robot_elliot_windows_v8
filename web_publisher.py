@@ -18,26 +18,27 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from instruments import symbol_state_path
 
 
 BASE_DIR = Path(__file__).resolve().parent
 ARCHIVE_DIR = BASE_DIR / "analysis_archive"
 STATE_DIR = BASE_DIR / "state"
-MARKET_SNAPSHOT_PATH = STATE_DIR / "web_market_snapshot.json"
+MARKET_SNAPSHOT_PATH = symbol_state_path("web_market_snapshot.json")
 DEFAULT_CONFIG_PATH = BASE_DIR / "config" / "web_export.json"
-PUBLISHER_STATE_PATH = STATE_DIR / "web_publisher_state.json"
+PUBLISHER_STATE_PATH = symbol_state_path("web_publisher_state.json")
 
 PUBLISH_NAMESPACE = uuid.UUID("66e91a8e-b0af-4530-9ed7-70f470e9ea25")
 ENGINE_ID_PATTERN = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 
 RUNTIME_SOURCE_PATHS = {
-    "runner_status": STATE_DIR / "runner_status.json",
-    "analysis_state": STATE_DIR / "analysis_state.json",
-    "trade_state": STATE_DIR / "trade_state.json",
-    "fundingpips_risk_state": STATE_DIR / "fundingpips_risk_state.json",
-    "claude_reference_state": STATE_DIR / "claude_reference_state.json",
-    "claude_request_guard": STATE_DIR / "claude_request_guard.json",
-    "entry_watch": STATE_DIR / "entry_watch.json",
+    "runner_status": symbol_state_path("runner_status.json"),
+    "analysis_state": symbol_state_path("analysis_state.json"),
+    "trade_state": symbol_state_path("trade_state.json"),
+    "fundingpips_risk_state": symbol_state_path("fundingpips_risk_state.json"),
+    "claude_reference_state": symbol_state_path("claude_reference_state.json"),
+    "claude_request_guard": symbol_state_path("claude_request_guard.json"),
+    "entry_watch": symbol_state_path("entry_watch.json"),
 }
 
 DEFAULTS = {

@@ -10,7 +10,9 @@ import MetaTrader5 as mt5
 # ОСНОВНЫЕ НАСТРОЙКИ
 # ============================================================
 
-SYMBOL = "XAUUSD"
+from instruments import active_instrument, symbol_state_path
+
+SYMBOL = active_instrument()
 
 
 # ============================================================
@@ -67,10 +69,7 @@ STATE_DIR = (
     / "state"
 )
 
-RISK_STATE_PATH = (
-    STATE_DIR
-    / "fundingpips_risk_state.json"
-)
+RISK_STATE_PATH = symbol_state_path("fundingpips_risk_state.json")
 
 
 # ============================================================

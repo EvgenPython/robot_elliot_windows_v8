@@ -2,6 +2,9 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from instruments import active_instrument
+
+SYMBOL = active_instrument()
 
 import anthropic
 from anthropic import Anthropic
@@ -2571,7 +2574,7 @@ def validate_analysis_contract(
         "not_assessed_legacy",
     }
 
-    if analysis.get("instrument") != "XAUUSD":
+    if analysis.get("instrument") != SYMBOL:
         raise ValueError(
             f"Claude вернул неожиданный инструмент: {analysis.get('instrument')}."
         )

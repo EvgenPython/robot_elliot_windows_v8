@@ -13,7 +13,9 @@ from prop_time import FUNDINGPIPS_TZ, now_fp
 # ОСНОВНЫЕ НАСТРОЙКИ
 # ============================================================
 
-SYMBOL = "XAUUSD"
+from instruments import active_instrument
+
+SYMBOL = active_instrument()
 
 
 # ============================================================

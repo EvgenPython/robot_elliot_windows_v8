@@ -15,7 +15,9 @@ from risk_manager import now_fp
 # ОСНОВНЫЕ НАСТРОЙКИ
 # ============================================================
 
-SYMBOL = "XAUUSD"
+from instruments import active_instrument, symbol_state_path
+
+SYMBOL = active_instrument()
 
 STATE_VERSION = 2
 
@@ -35,10 +37,7 @@ STATE_DIR = (
     / "state"
 )
 
-TRADE_STATE_PATH = (
-    STATE_DIR
-    / "trade_state.json"
-)
+TRADE_STATE_PATH = symbol_state_path("trade_state.json")
 
 
 # ============================================================

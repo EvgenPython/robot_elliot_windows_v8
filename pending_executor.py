@@ -50,7 +50,9 @@ from trade_state import (
 # ОСНОВНЫЕ НАСТРОЙКИ
 # ============================================================
 
-SYMBOL = "XAUUSD"
+from instruments import active_instrument
+
+SYMBOL = active_instrument()
 
 PENDING_ORDER_TYPES = (
     "limit",

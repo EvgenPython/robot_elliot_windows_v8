@@ -10,11 +10,12 @@ import os
 from pathlib import Path
 
 from claude_payload import build_claude_payload
+from instruments import symbol_state_path
 
 
 BASE_DIR = Path(__file__).resolve().parent
 STATE_DIR = BASE_DIR / "state"
-WEB_MARKET_SNAPSHOT_PATH = STATE_DIR / "web_market_snapshot.json"
+WEB_MARKET_SNAPSHOT_PATH = symbol_state_path("web_market_snapshot.json")
 
 
 def _atomic_write_json(path: Path, payload: dict):

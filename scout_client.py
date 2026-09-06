@@ -2,6 +2,9 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from instruments import active_instrument
+
+SYMBOL = active_instrument()
 
 import anthropic
 
@@ -73,7 +76,7 @@ SCOUT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
     "properties": {
-        "instrument": {"type": "string", "enum": ["XAUUSD"]},
+        "instrument": {"type": "string", "enum": [SYMBOL]},
         "timestamp": {"type": "string"},
         "material_change": {"type": "boolean"},
         "possible_setup": {"type": "boolean"},
@@ -193,6 +196,7 @@ full_analysis_required=false, если нет отдельного нового 
 swing high/low или буквальные машинные enum: переводи их естественно. Это один вывод Scout,
 а не два независимых решения. Ответ должен строго соответствовать JSON schema.
 """.strip()
+SCOUT_SYSTEM_PROMPT = SCOUT_SYSTEM_PROMPT.replace("XAUUSD", SYMBOL)
 
 
 def _compact_json(value) -> str:
@@ -612,7 +616,7 @@ def analyze_scout(
     # безопаснее эскалировать в FULL, а не повторять Scout.
     if stop_reason == "max_tokens":
         return {
-            "instrument": "XAUUSD",
+            "instrument": SYMBOL,
             "timestamp": str(payload.get("timestamp")),
             "material_change": True,
             "possible_setup": True,
@@ -633,7 +637,7 @@ def analyze_scout(
         None,
     ):
         return {
-            "instrument": "XAUUSD",
+            "instrument": SYMBOL,
             "timestamp": str(payload.get("timestamp")),
             "material_change": True,
             "possible_setup": True,
@@ -652,7 +656,7 @@ def analyze_scout(
         result = json.loads(text)
     except json.JSONDecodeError:
         result = {
-            "instrument": "XAUUSD",
+            "instrument": SYMBOL,
             "timestamp": str(payload.get("timestamp")),
             "material_change": True,
             "possible_setup": True,

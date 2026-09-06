@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from instruments import symbol_state_path
 
 import MetaTrader5 as mt5
 
@@ -14,9 +15,9 @@ from prop_time import now_fp
 
 BASE_DIR = Path(__file__).resolve().parent
 STATE_DIR = BASE_DIR / "state"
-RUNNER_STATUS_PATH = STATE_DIR / "runner_status.json"
-TRADE_STATE_PATH = STATE_DIR / "trade_state.json"
-ANALYSIS_STATE_PATH = STATE_DIR / "analysis_state.json"
+RUNNER_STATUS_PATH = symbol_state_path("runner_status.json")
+TRADE_STATE_PATH = symbol_state_path("trade_state.json")
+ANALYSIS_STATE_PATH = symbol_state_path("analysis_state.json")
 
 
 def _read_json(path: Path) -> dict:
